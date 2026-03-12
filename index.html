@@ -437,48 +437,30 @@ function closeModal(){ document.getElementById('modalOv').classList.remove('open
 // ── GOOGLE SHEETS MANUAL REFRESH ──
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
-function manualRefresh(){
+async function manualRefresh(){
   if(!SHEETS_URL){ toast('⚠️ ยังไม่ได้ตั้งค่า SHEETS_URL'); return; }
-  const dot=document.getElementById('syncDot'); const txt=document.getElementById('syncTxt');
+  const dot=document.getElementById('syncDot');
+  const txt=document.getElementById('syncTxt');
   dot.className='sync-dot spin'; txt.textContent='กำลังดึง...';
-
-  // ใช้ JSONP เพื่อหลีกเลี่ยง CORS เมื่อเปิดจาก file://
-  const cbName='__sheetsCB_'+Date.now();
-  const script=document.createElement('script');
-
-  window[cbName]=function(data){
-    delete window[cbName];
-    document.body.removeChild(script);
-    clearTimeout(timeoutId);
-    if(data&&data.bookings){
-      liveData=data.bookings;
+  try{
+    const res = await fetch(SHEETS_URL+'?t='+Date.now());
+    const data = await res.json();
+    if(data && data.bookings && Object.keys(data.bookings).length > 0){
+      liveData = data.bookings;
       dot.className='sync-dot live';
-      const t=new Date();
+      const t = new Date();
       txt.textContent='✅ '+t.toLocaleTimeString('th-TH',{hour12:false});
       document.getElementById('syncTime').textContent='อัปเดต '+t.toLocaleTimeString('th-TH',{hour12:false});
       renderGrid(currentDate);
-      toast('✅ ดึงข้อมูลจาก Google Sheets สำเร็จ');
+      toast('✅ ดึงข้อมูลจาก Google Sheets สำเร็จ ('+data.total+' รายการ)');
     } else {
-      dot.className='sync-dot err'; txt.textContent='🔄 Refresh';
-      toast('⚠️ ข้อมูลว่างเปล่า — ลองใหม่อีกครั้ง');
+      throw new Error('empty data');
     }
-  };
-
-  const timeoutId=setTimeout(function(){
-    if(window[cbName]){ delete window[cbName]; }
-    try{ document.body.removeChild(script); }catch(e){}
+  } catch(e){
     dot.className='sync-dot err'; txt.textContent='🔄 Refresh';
-    toast('⚠️ เชื่อมต่อ Sheets ไม่ได้ — ลองใหม่อีกครั้ง');
-  }, 15000);
-
-  script.src=SHEETS_URL+'?callback='+cbName+'&t='+Date.now();
-  script.onerror=function(){
-    clearTimeout(timeoutId);
-    delete window[cbName];
-    dot.className='sync-dot err'; txt.textContent='🔄 Refresh';
-    toast('⚠️ เชื่อมต่อ Sheets ไม่ได้ — ลองใหม่อีกครั้ง');
-  };
-  document.body.appendChild(script);
+    toast('⚠️ เชื่อมต่อ Sheets ไม่ได้: '+e.message);
+    console.error('Sheets error:', e);
+  }
 }
 
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
