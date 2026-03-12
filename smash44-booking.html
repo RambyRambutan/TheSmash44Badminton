@@ -486,10 +486,10 @@ function openModal(){
   const{grand,cd}=calcAll();
   $('mDate').innerHTML=`📅 ${fmtThai(S.date)}`;
   let ch="";
-  cd.forEach(({court,hrs,total,lines})=>{
+  cd.forEach(({court,slots,total,lines})=>{
     ch+=`<div class="s-block">
       <div class="s-block-head">
-        <span class="s-bn">🏸 สนาม ${court} <span style="color:var(--text4);font-size:11px;font-weight:600">${hrs.length} ชม.</span></span>
+        <span class="s-bn">🏸 สนาม ${court} <span style="color:var(--text4);font-size:11px;font-weight:600">${slots.length} ชม.</span></span>
         <span class="s-bp">${total.toLocaleString()} ฿</span>
       </div>
       <div class="s-bt">${slots.map(h=>`${fmtH(h)}–${fmtH(h+1)}`).join(", ")}</div>
@@ -516,7 +516,7 @@ function sendLine(){
   $('errPhone').style.display=/^0[0-9]{8,9}$/.test(phone)?"none":"block";
   if(!name||!/^0[0-9]{8,9}$/.test(phone))return;
   const{grand,cd}=calcAll();
-  const detail=cd.map(({court,hrs,total,lines})=>
+  const detail=cd.map(({court,slots,total,lines})=>
     `  สนาม ${court}: ${slots.map(h=>`${fmtH(h)}–${fmtH(h+1)}`).join(", ")}\n  `+
     lines.map(l=>`${l.n}ชม.×${l.rate}฿${l.promo?" (โปร!)":""}`).join("+")+` = ${total}฿`
   ).join("\n");
