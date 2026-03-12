@@ -28,7 +28,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-
+ 
 /* ── HEADER ── */
 .hd{background:var(--bg1);border-bottom:1px solid var(--border2);height:54px;display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:300}
 .hd-logo{width:36px;height:36px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bg3)}
@@ -39,14 +39,14 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .hd-live{display:flex;align-items:center;gap:5px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.28);border-radius:8px;padding:4px 8px;font-size:11px;font-weight:700;color:#22c55e;white-space:nowrap}
 .hd-live-dot{width:6px;height:6px;border-radius:50%;background:#22c55e;animation:blink 1.4s infinite;flex-shrink:0}
 .hd-time{font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.04em;white-space:nowrap}
-
+ 
 /* ── SUB HEADER ── */
 .sub-hd{padding:7px 14px;font-size:11px;color:var(--text4);border-bottom:1px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
-
+ 
 /* ── ERROR BANNER ── */
 .err-banner{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.18);border-radius:0;padding:8px 14px;font-size:11px;color:#f87171;display:none;align-items:center;gap:8px}
 .err-banner.show{display:flex}
-
+ 
 /* ── DATE STRIP ── */
 .ds-wrap{background:var(--bg1);border-bottom:1px solid var(--border2);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .ds-wrap::-webkit-scrollbar{height:0}
@@ -60,20 +60,20 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .db.tod .dd{color:var(--acc2)}
 .db.act{background:var(--acc3);border-color:var(--acc);color:#fff;box-shadow:0 2px 10px var(--accglow)}
 .db.act .dm,.db.act .dw{color:rgba(255,255,255,.65)}
-
+ 
 /* ── DATE LABEL BAR ── */
 .dl-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid var(--border2);background:var(--bg)}
 .dl-txt{font-size:14px;font-weight:800}
 .dl-upd{font-size:10px;color:var(--text4)}
 .btn-refresh{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:5px 10px;color:var(--text3);font-size:11px;display:flex;align-items:center;gap:4px;transition:all .15s}
 .btn-refresh:hover{border-color:var(--acc);color:var(--acc2)}
-
+ 
 /* ── TIMELINE ── */
 .tl-outer{overflow:auto;-webkit-overflow-scrolling:touch;background:var(--bg1);height:calc(100vh - 220px);min-height:280px}
 .tl-inner{min-width:820px}
 .tl-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:52px 0;color:var(--text4);font-size:13px;gap:10px;min-width:820px}
 .spin{width:24px;height:24px;border:2px solid var(--border);border-top-color:var(--acc);border-radius:50%;animation:spin .7s linear infinite}
-
+ 
 /* grid */
 .tl-head,.tl-row{display:grid}
 .tl-head{background:var(--bg2);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:20}
@@ -85,7 +85,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .tl-cname{background:var(--bg);border-right:1px solid var(--border2);padding:0 8px;font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;position:sticky;left:0;z-index:10;white-space:nowrap}
 .tl-cell{border-right:1px solid var(--border2);height:50px;padding:3px;display:flex;align-items:stretch}
 .tl-cell:last-child{border-right:none}
-
+ 
 /* slots */
 .slot{width:100%;height:100%;border-radius:6px;border:1px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .12s;line-height:1.3;text-align:center;padding:2px}
 .s-empty{cursor:default}
@@ -96,12 +96,12 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .s-alt:hover{background:rgba(34,197,94,.28);border-color:rgba(34,197,94,.75);transform:scale(1.05)}
 .s-sel{background:var(--slot-sel-bg)!important;border-color:var(--slot-sel-bd)!important;color:#fff!important;box-shadow:0 0 10px var(--accglow);cursor:pointer}
 .s-sel:hover{background:rgba(168,85,247,.75)!important}
-
+ 
 /* ── LEGEND ── */
 .legend{display:flex;gap:14px;padding:8px 14px;background:var(--bg);border-top:1px solid var(--border2);flex-wrap:wrap}
 .li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text3)}
 .ld{width:9px;height:9px;border-radius:2px;border:1px solid transparent;flex-shrink:0}
-
+ 
 /* ── BOOKING BAR ── */
 .bbar{position:fixed;bottom:0;left:0;right:0;background:var(--bg1);border-top:1px solid var(--border);padding:10px 14px;z-index:200;transform:translateY(100%);transition:transform .28s ease}
 .bbar.show{transform:translateY(0)}
@@ -112,7 +112,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .bbar-sub{font-size:10px;color:var(--text4)}
 .btn-book{background:linear-gradient(135deg,var(--acc3),var(--acc));color:#fff;border-radius:11px;padding:11px 20px;font-size:14px;font-weight:800;white-space:nowrap;box-shadow:0 4px 16px var(--accglow);transition:all .2s}
 .btn-book:hover{transform:translateY(-1px)}
-
+ 
 /* ── MODAL ── */
 .mbg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;display:none;align-items:flex-end;justify-content:center}
 .mbg.open{display:flex;animation:fadeUp .22s ease}
@@ -120,7 +120,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .m-handle{width:34px;height:4px;background:var(--bg3);border-radius:2px;margin:0 auto 16px}
 .m-title{font-size:18px;font-weight:900;margin-bottom:3px}
 .m-sub{font-size:12px;color:var(--text3);margin-bottom:16px}
-
+ 
 /* summary */
 .s-date{font-size:12px;color:var(--text3);margin-bottom:10px}
 .s-block{background:var(--bg2);border:1px solid var(--border2);border-radius:11px;padding:10px 12px;margin-bottom:8px}
@@ -133,7 +133,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .s-total{display:flex;justify-content:space-between;align-items:center;padding:11px 0 6px;border-top:1px solid var(--border2);margin-top:4px}
 .s-total-lbl{font-size:12px;color:var(--text3)}
 .s-total-val{font-size:26px;font-weight:900;color:var(--acc2)}
-
+ 
 /* form */
 .fg{margin-bottom:11px}
 .fl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;display:block;margin-bottom:4px}
@@ -141,12 +141,12 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .fi:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(168,85,247,.12)}
 .fi::placeholder{color:var(--text4)}
 .ferr{color:#f87171;font-size:11px;margin-top:3px;display:none}
-
+ 
 .btn-line{width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,#06c755,#00b900);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 5px 18px rgba(0,185,0,.28);transition:all .2s;margin-top:12px}
 .btn-line:hover{transform:translateY(-1px)}
 .btn-cxl{width:100%;padding:11px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);color:var(--text3);font-size:14px;font-weight:600;margin-top:7px;transition:all .15s}
 .btn-cxl:hover{border-color:var(--acc);color:var(--acc2)}
-
+ 
 /* success */
 .suc{text-align:center;padding:12px 0 6px}
 .suc-icon{font-size:52px;margin-bottom:10px}
@@ -155,7 +155,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 </style>
 </head>
 <body>
-
+ 
 <!-- HEADER -->
 <header class="hd">
   <div class="hd-logo">
@@ -169,22 +169,22 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
     <div class="hd-time" id="liveClock"></div>
   </div>
 </header>
-
+ 
 <!-- SUB HEADER -->
 <div class="sub-hd">
   <span><strong style="color:var(--text2)">The Smash 44</strong> · <span id="subMonth"></span> · 7 Courts · 08.00–00.00</span>
   <span id="updTime" class="dl-upd"></span>
 </div>
-
+ 
 <!-- ERROR -->
 <div class="err-banner" id="errBanner">
   ⚠ <span id="errTxt">โหลดข้อมูลไม่สำเร็จ ใช้ข้อมูล Demo แทน</span>
   <button onclick="fetchSheet()" style="margin-left:auto;background:rgba(239,68,68,.15);border-radius:5px;padding:3px 8px;color:#f87171;font-size:11px;font-family:inherit;cursor:pointer">ลองใหม่</button>
 </div>
-
+ 
 <!-- DATE STRIP -->
 <div class="ds-wrap"><div class="ds" id="ds"></div></div>
-
+ 
 <!-- DATE LABEL BAR -->
 <div class="dl-bar">
   <div>
@@ -198,15 +198,15 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
   </div>
   <button class="btn-refresh" onclick="fetchSheet()">🔄 รีเฟรช</button>
 </div>
-
+ 
 <!-- TIMELINE -->
 <div class="tl-outer">
   <div class="tl-loading" id="tlLoad"><div class="spin"></div>กำลังโหลด...</div>
   <div class="tl-inner" id="tlInner" style="display:none"></div>
 </div>
-
-
-
+ 
+ 
+ 
 <!-- BOOKING BAR -->
 <div class="bbar" id="bbar">
   <div class="bbar-in">
@@ -218,12 +218,12 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
     <button class="btn-book" onclick="openModal()">จองเลย →</button>
   </div>
 </div>
-
+ 
 <!-- MODAL -->
 <div class="mbg" id="mbg" onclick="bgClick(event)">
   <div class="modal">
     <div class="m-handle"></div>
-
+ 
     <div id="stepForm">
       <div class="m-title">ยืนยันการจอง</div>
       <div class="m-sub">กรอกชื่อ-เบอร์แล้วส่งผ่าน Line OA</div>
@@ -249,7 +249,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
       </button>
       <button class="btn-cxl" onclick="closeModal()">ยกเลิก</button>
     </div>
-
+ 
     <div id="stepSuccess" style="display:none">
       <div class="suc">
         <div class="suc-icon">🏸</div>
@@ -260,7 +260,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
     </div>
   </div>
 </div>
-
+ 
 <script>
 // Safe element getter — never throws, returns dummy if missing
 const $=id=>{
@@ -268,7 +268,7 @@ const $=id=>{
   if(!el){console.warn('Missing element #'+id);return{style:{},classList:{add:()=>{},remove:()=>{}},textContent:'',innerHTML:'',value:''};}
   return el;
 };
-
+ 
 const CSV_URL="https://docs.google.com/spreadsheets/d/e/2PACX-1vT_Y-P5hES-bEIqwOSIgoD6knFj2QjcUhf0RmegoiI4CRvO4k6QE6nHRWoM0xbkwAiW8X-qoYeu6qc9/pub?gid=2082871826&single=true&output=csv";
 const LINE_OA="@thesmash44";
 const COURTS=[1,2,3,4,5,6,7];
@@ -278,9 +278,9 @@ const TH_MON=["มกราคม","กุมภาพันธ์","มีน�
 const TH_DAY=["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัสบดี","ศุกร์","เสาร์"];
 const EN_MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const EN_DOW=["SUN","MON","TUE","WED","THU","FRI","SAT"];
-
+ 
 let S={date:"",sel:{},data:null,loading:false};
-
+ 
 // ── helpers ──
 const todayStr=()=>new Date().toISOString().split("T")[0];
 const isWknd=ds=>{const d=new Date(ds+"T12:00:00");return d.getDay()===0||d.getDay()===6;};
@@ -289,7 +289,7 @@ const fmtH=h=>(h>=24?"00":String(h).padStart(2,"0"))+":00";
 const fmtThai=ds=>{const d=new Date(ds+"T12:00:00");return`วัน${TH_DAY[d.getDay()]}ที่ ${d.getDate()} ${TH_MON[d.getMonth()]} ${d.getFullYear()+543}`;};
 const sk=(c,h)=>`${c}_${h}`;
 const nSel=()=>Object.keys(S.sel).length;
-
+ 
 // ── clock ──
 function tick(){
   const cl=$('liveClock');
@@ -301,7 +301,7 @@ function tick(){
   ld.textContent=`${n.getDate()} ${EN_MON[n.getMonth()]}`;
   sm.textContent=`${TH_MON[n.getMonth()]} ${n.getFullYear()+543}`;
 }
-
+ 
 // ── date strip ──
 function getBookingRange(){
   const now=new Date();
@@ -316,18 +316,18 @@ function getBookingRange(){
   const maxDate=`${maxY}-${String(maxM+1).padStart(2,"0")}-${String(lastDay).padStart(2,"0")}`;
   return{minDate,maxDate,showNext:d>=26};
 }
-
+ 
 function buildStrip(){
   const now=new Date(),y=now.getFullYear(),m=now.getMonth(),today=todayStr();
   const{minDate,maxDate,showNext}=getBookingRange();
-
+ 
   // build dates: this month + next month if showNext
   const months=[[y,m]];
   if(showNext){
     const nm=m+1>11?0:m+1, ny=m+1>11?y+1:y;
     months.push([ny,nm]);
   }
-
+ 
   let h="";
   let prevM=-1;
   months.forEach(([my,mm])=>{
@@ -361,7 +361,7 @@ function buildStrip(){
   });
   $('ds').innerHTML=h;
 }
-
+ 
 function selDate(ds){
   S.date=ds;S.sel={};
   buildStrip();
@@ -372,17 +372,17 @@ function selDate(ds){
     if(btn)btn.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
   },50);
 }
-
+ 
 // ── pricing ──
 const ZONES=[{from:10,to:18,base:200,disc:149},{from:18,to:22,base:280,disc:null},{from:22,to:24,base:200,disc:null}];
-
+ 
 // นับชั่วโมงรวมทุกสนามในโซน 10-18 (วันธรรมดา) เพื่อตัดสินโปร
 function countZoneHrsAllCourts(ds, allSlots){
   // allSlots = array ของ h ทั้งหมดทุกสนาม (อาจซ้ำเวลากันคนละสนาม)
   if(isWknd(ds)) return 0;
   return allSlots.filter(h=>h>=10&&h<18).length;
 }
-
+ 
 function courtBD(ds, slots, promoZone10){
   // promoZone10 = bool — ถ้า true ให้ใช้ราคา 149 ในโซน 10-18
   if(!slots.length) return{total:0,lines:[]};
@@ -403,16 +403,16 @@ function courtBD(ds, slots, promoZone10){
   });
   return{total,lines};
 }
-
+ 
 function calcAll(){
   const cm={};
   Object.keys(S.sel).forEach(k=>{const[c,h]=k.split("_");if(!cm[c])cm[c]=[];cm[c].push(+h);});
-
+ 
   // รวมชั่วโมงโซน 10-18 ทุกสนาม เพื่อเช็คเงื่อนไขโปร
   const allHours=Object.values(cm).flat();
   const totalZone=countZoneHrsAllCourts(S.date, allHours);
   const promoZone10 = totalZone >= 2; // >=2 ชม. รวมทุกสนาม
-
+ 
   let grand=0;
   const cd=Object.keys(cm).sort((a,b)=>a-b).map(c=>{
     const slots=cm[c].sort((a,b)=>a-b);
@@ -421,7 +421,7 @@ function calcAll(){
   });
   return{grand,cd,promoZone10};
 }
-
+ 
 // ── booking bar ──
 function updateBar(){
   const bar=$('bbar');
@@ -432,7 +432,7 @@ function updateBar(){
   $('bbPrice').textContent=grand.toLocaleString()+" ฿";
   $('bbSub').textContent=`${nSel()} ชม. · ${cd.length} สนาม`;
 }
-
+ 
 // ── timeline ──
 function isBooked(c,h){
   if(!S.data)return false;
@@ -455,7 +455,7 @@ function renderTL(){
     <div class="tl-corner">สนาม</div>`;
   hrs.forEach(hr=>{h+=`<div class="tl-hcell">${hr}.00</div>`;});
   h+=`</div>`;
-
+ 
   // rows
   COURTS.forEach(c=>{
     h+=`<div class="tl-row" style="grid-template-columns:${gc}">
@@ -473,7 +473,7 @@ function renderTL(){
     });
     h+=`</div>`;
   });
-
+ 
   tlInner.innerHTML=h;tlInner.style.display="block";
   tlLoad.style.display="none";
 }
@@ -482,7 +482,7 @@ function tog(c,h){
   S.sel[k]?delete S.sel[k]:(S.sel[k]=true);
   renderTL();updateBar();
 }
-
+ 
 // ── modal ──
 function openModal(){
   if(!nSel())return;
@@ -511,7 +511,7 @@ function openModal(){
 function closeModal(){$('mbg').classList.remove("open");document.body.style.overflow="";}
 function bgClick(e){if(e.target===$('mbg'))closeModal();}
 function resetSel(){S.sel={};renderTL();updateBar();}
-
+ 
 function sendLine(){
   const name=$('inpName').value.trim();
   const phone=$('inpPhone').value.trim();
@@ -532,7 +532,7 @@ function sendLine(){
   $('stepForm').style.display="none";
   $('stepSuccess').style.display="block";
 }
-
+ 
 // ── csv parser ──
 function parseCSV(line){
   const r=[];let cur="",inQ=false;
@@ -556,9 +556,10 @@ function parseSheet(csv){
     const m=raw.match(/^(\d{1,2}(?:\.\d+)?)[-–](\d{1,2}(?:\.\d+)?)$/);
     if(!m)return;
     const start=parseFloat(m[1]);
-    // convert "8.30" → 8.5 style
-    const norm=v=>{const i=Math.floor(v);const f=Math.round((v-i)*100);return f===30?i+0.5:i+(f/100);};
-    hcols[i]=norm(start);
+    // map any half-hour slot back to the whole hour
+    // e.g. 8.30 → floor = 8, so both "8-8.30" and "8.30-9" map to hour 8
+    const wholeHour=Math.floor(start);
+    hcols[i]=wholeHour;
   });
   const mEN={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
   let cy=new Date().getFullYear(),cm=new Date().getMonth(),cd=null;
@@ -590,7 +591,7 @@ function mockData(){
   }
   return d;
 }
-
+ 
 async function fetchSheet(){
   if(S.loading)return;S.loading=true;
   $('errBanner').classList.remove("show");
@@ -611,7 +612,7 @@ async function fetchSheet(){
   S.loading=false;
   if(S.date)renderTL();
 }
-
+ 
 // ── init ──
 function setTlTop(){
   // measure all sticky elements above the timeline
@@ -637,3 +638,4 @@ window.addEventListener('resize',setTlTop);
 </script>
 </body>
 </html>
+ 
