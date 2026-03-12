@@ -286,7 +286,7 @@ const EN_DOW=["SUN","MON","TUE","WED","THU","FRI","SAT"];
 let S={date:"",sel:{},data:null,loading:false};
 
 // ── helpers ──
-const todayStr=()=>new Date().toISOString().split("T")[0];
+const todayStr=()=>{const d=new Date();const bkk=new Date(d.toLocaleString("en-US",{timeZone:"Asia/Bangkok"}));return`${bkk.getFullYear()}-${String(bkk.getMonth()+1).padStart(2,"0")}-${String(bkk.getDate()).padStart(2,"0")}`;};
 const isWknd=ds=>{const d=new Date(ds+"T12:00:00");return d.getDay()===0||d.getDay()===6;};
 const getHrs=ds=>isWknd(ds)?ALL_H:WD_H;
 const fmtH=h=>(h>=24?"00":String(h).padStart(2,"0"))+":00";
