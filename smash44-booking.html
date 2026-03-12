@@ -557,7 +557,7 @@ function sendLine(){
     `รวมเป็นเงิน ${grand.toLocaleString()} บาท\n${sep}\n`+
     `ผู้จอง คุณ${name}  โทร. ${phone}`
   );
-  window.open(`https://line.me/R/oaMessage/${LINE_OA}/?text=${msg}`,"_blank");
+  window.open(`https://line.me/R/ti/p/${encodeURIComponent(LINE_OA)}?text=${msg}`,"_blank");
   $('stepForm').style.display="none";
   $('stepSuccess').style.display="block";
 }
