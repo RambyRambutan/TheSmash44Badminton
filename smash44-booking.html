@@ -14,7 +14,7 @@
   --acc:#b47aff;--acc2:#d4aaff;--acc3:#8b5cf6;
   --accglow:rgba(180,122,255,.25);
   --green:#34d399;--yellow:#fbbf24;
-  --slot-free-bg:transparent;--slot-free-bd:rgba(251,191,36,.45);--slot-free-tx:#fcd34d;
+  --slot-free-bg:transparent;--slot-free-bd:rgba(255,255,255,.1);--slot-free-tx:rgba(255,255,255,.15);
   --slot-alt-bg:transparent;--slot-alt-bd:rgba(52,211,153,.45);--slot-alt-tx:#6ee7b7;
   --slot-bk-bg:rgba(80,50,140,.4);--slot-bk-bd:rgba(140,90,240,.25);--slot-bk-tx:#a78bfa;
   --slot-mo-bg:rgba(37,99,235,.35);--slot-mo-bd:rgba(96,165,250,.35);--slot-mo-tx:#93c5fd;
@@ -99,7 +99,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .s-cr{background:var(--slot-cr-bg);border-color:var(--slot-cr-bd);color:var(--slot-cr-tx);cursor:not-allowed;font-size:9px;line-height:1.2;overflow:hidden}
 .s-co{background:var(--slot-co-bg);border-color:var(--slot-co-bd);color:var(--slot-co-tx);cursor:not-allowed;font-size:9px;line-height:1.2;overflow:hidden}
 .s-free{background:var(--slot-free-bg);border-color:var(--slot-free-bd);color:var(--slot-free-tx);cursor:pointer}
-.s-free:hover{background:rgba(234,179,8,.28);border-color:rgba(234,179,8,.75);transform:scale(1.05)}
+.s-free:hover{background:rgba(255,255,255,.06);border-color:rgba(180,122,255,.5);transform:scale(1.05)}
 .s-alt{background:var(--slot-alt-bg);border-color:var(--slot-alt-bd);color:var(--slot-alt-tx);cursor:pointer}
 .s-alt:hover{background:rgba(34,197,94,.28);border-color:rgba(34,197,94,.75);transform:scale(1.05)}
 .s-sel{background:var(--slot-sel-bg)!important;border-color:var(--slot-sel-bd)!important;color:#fff!important;font-weight:800;box-shadow:0 0 12px var(--accglow);cursor:pointer}
@@ -477,8 +477,7 @@ function renderTL(){
       let cls="slot ";
       if(sel)cls+="s-sel";
       else if(bk)cls+="s-"+info.type;
-      else if(c<=4)cls+="s-free";
-      else cls+="s-alt";
+      else cls+="s-free";
       const oc=(!bk)?`onclick="tog(${c},${hr})"` :"";
       const lbl=sel?"✓":bk?"ไม่ว่าง":"";
       h+=`<div class="tl-cell"><div class="${cls}" ${oc}>${lbl}</div></div>`;
