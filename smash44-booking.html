@@ -635,7 +635,8 @@ function parseJSON(json){
   const res={};
   try{
     const lu=json.lastUpdated?new Date(json.lastUpdated):new Date();
-    const refY=lu.getFullYear(), refM=lu.getMonth();
+    // ใช้เดือนและปีจาก lastUpdated เป็น reference
+    const refY=lu.getFullYear(), refM=lu.getMonth(); // 0-based
     const typeMap=t=>{
       if(!t)return'bk';
       const lo=t.toLowerCase();
@@ -644,23 +645,28 @@ function parseJSON(json){
       if(lo==='oncall')return'cr';
       return'bk';
     };
-    // bookings เป็น object ของ arrays
     const bkObj=json.bookings||{};
     const allBookings=Array.isArray(bkObj)?bkObj:Object.values(bkObj).flat();
     allBookings.forEach(b=>{
       const day=+b.date, ct=+b.court;
+      const span=+b.courtSpan||1;
       const hS=+b.hS, hE=+b.hE;
       const name=b.name||b.full||"จอง";
       const typ=typeMap(b.type);
       if(!day||!ct||isNaN(hS)||isNaN(hE))return;
+      // คำนวณเดือน: ถ้า day > วันที่ใน lastUpdated มากกว่า 15 → เดือนก่อน
       let y=refY, m=refM;
-      if(day < lu.getDate()-15){m++;if(m>11){m=0;y++;}}
+      if(day > lu.getDate()+15){m--;if(m<0){m=11;y--;}}
       const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
       if(!res[ds])res[ds]={};
-      if(!res[ds][ct])res[ds][ct]=new Map();
-      // hS/hE อาจเป็น .5 (ครึ่งชม.) → ปัดลงเป็นชั่วโมงเต็ม
       const hStart=Math.floor(hS), hEnd=Math.ceil(hE);
-      for(let h=hStart;h<hEnd;h++) res[ds][ct].set(h,{text:name,type:typ});
+      // fill ทุกสนามใน courtSpan
+      for(let s=0;s<span;s++){
+        const courtNum=ct+s;
+        if(courtNum>7)break;
+        if(!res[ds][courtNum])res[ds][courtNum]=new Map();
+        for(let h=hStart;h<hEnd;h++) res[ds][courtNum].set(h,{text:name,type:typ});
+      }
     });
   }catch(e){console.error("parseJSON error:",e);}
   return res;
@@ -696,6 +702,9 @@ async function fetchSheet(){
     const t=new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
     $('updTime').textContent="อัพเดต "+t+" น.";
     $('dlUpd').textContent="อัพเดต "+t+" น.";
+    // แสดง ✅ ที่ปุ่ม refresh
+    const btn=document.querySelector('.btn-refresh');
+    if(btn){btn.innerHTML="✅ อัพเดตแล้ว";setTimeout(()=>{btn.innerHTML="🔄 รีเฟรช";},3000);}
   }catch(e){
     console.error("fetchSheet:",e);
     $('errTxt').textContent=(e.message||"โหลดไม่ได้")+" — ใช้ข้อมูล Demo";
