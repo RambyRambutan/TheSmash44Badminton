@@ -258,7 +258,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
       <div class="suc">
         <div class="suc-icon">🏸</div>
         <div class="suc-title">ส่งคำขอแล้ว!</div>
-        <div class="suc-sub">เจ้าหน้าที่จะยืนยันการจองและส่ง<br><strong style="color:var(--acc2)">QR Code ชำระเงิน</strong> ทาง Line OA ค่ะ<br><span style="font-size:12px;color:var(--text3)">ภายใน 10 นาที</span></div>
+        <div class="suc-sub">ข้อความจองถูก<strong style="color:var(--acc2)"> คัดลอกแล้ว</strong><br>กรุณา <strong style="color:#fcd34d">วางข้อความ (Paste)</strong> ใน Line ที่เปิดขึ้นมา<br><span style="font-size:12px;color:var(--text3)">เจ้าหน้าที่จะยืนยันและส่ง QR Code ภายใน 10 นาที</span></div>
         <button class="btn-cxl" onclick="closeModal();resetSel()">🏸 จองสนามใหม่</button>
       </div>
     </div>
@@ -535,7 +535,7 @@ function mergeSlots(slots){
   ranges.push(`${fmtH(start)}–${fmtH(prev+1)}`);
   return ranges.join(", ");
 }
-function sendLine(){
+async function sendLine(){
   const name=$('inpName').value.trim();
   const phone=$('inpPhone').value.trim();
   $('errName').style.display=name?"none":"block";
@@ -557,7 +557,15 @@ function sendLine(){
     `รวมเป็นเงิน ${grand.toLocaleString()} บาท\n${sep}\n`+
     `ผู้จอง คุณ${name}  โทร. ${phone}`
   );
-  window.open(`https://line.me/R/ti/p/${encodeURIComponent(LINE_OA)}?text=${msg}`,"_blank");
+  // Copy message to clipboard แล้วเปิด Line — user paste เอง
+  const rawMsg=`สรุปการจองสนาม The Smash 44\n\n`+
+    `${fmtThai(S.date)}\n${sep}\n`+
+    `${detail}\n`+
+    `รวม ${totalHrs} ชั่วโมง\n`+
+    `รวมเป็นเงิน ${grand.toLocaleString()} บาท\n${sep}\n`+
+    `ผู้จอง คุณ${name}  โทร. ${phone}`;
+  try{await navigator.clipboard.writeText(rawMsg);}catch(e){}
+  window.open(`https://line.me/R/ti/p/${encodeURIComponent(LINE_OA)}`,"_blank");
   $('stepForm').style.display="none";
   $('stepSuccess').style.display="block";
 }
