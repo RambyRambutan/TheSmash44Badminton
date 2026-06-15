@@ -111,6 +111,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
 .s-alt:hover{background:rgba(34,197,94,.28);border-color:rgba(34,197,94,.75);transform:scale(1.05)}
 .s-sel{background:var(--slot-sel-bg)!important;border-color:var(--slot-sel-bd)!important;color:#fff!important;font-weight:800;box-shadow:0 0 12px var(--accglow);cursor:pointer}
 .s-sel:hover{background:rgba(168,85,247,.75)!important}
+.s-closed{background:rgba(30,30,30,.5);border-color:rgba(100,100,100,.3);color:rgba(150,150,150,.6);cursor:not-allowed;font-size:8px;letter-spacing:.03em}
 
 /* ── LEGEND ── */
 .legend{display:flex;gap:14px;padding:8px 14px;background:var(--bg);border-top:1px solid var(--border2);flex-wrap:wrap}
@@ -511,17 +512,22 @@ function renderTL(){
   hrs.forEach(hr=>{h+=`<div class="tl-hcell">${String(hr).padStart(2,'0')}.00</div>`;});
   h+=`</div>`;
   activeCourts.forEach(c=>{
+    // เช็คว่าสนามนี้ "ยังไม่เปิดให้บริการ" ทั้งหมดไหม
+    const courtData=S.data&&S.data[S.date]&&S.data[S.date][c];
+    const isCourtClosed=courtData&&Array.from(courtData.values()).some(v=>v&&v.type==='closed');
     h+=`<div class="tl-row" style="grid-template-columns:${gc}">
-      <div class="tl-cname">สนาม ${c}</div>`;
+      <div class="tl-cname" style="${isCourtClosed?'opacity:.45;':''}">สนาม ${c}</div>`;
     hrs.forEach(hr=>{
       const info=bookingInfo(c,hr),sel=!!S.sel[sk(c,hr)];
       const bk=!!info;
+      const isClosed=bk&&info.type==='closed';
       let cls="slot ";
       if(sel)cls+="s-sel";
+      else if(isClosed)cls+="s-closed";
       else if(bk)cls+="s-"+info.type;
       else cls+="s-free";
-      const oc=!bk?`onclick="tog('${c}',${hr})"` :"";
-      const lbl=sel?"✓":bk?"ไม่ว่าง":"";
+      const oc=(!bk&&!isClosed)?`onclick="tog('${c}',${hr})"` :"";
+      const lbl=sel?"✓":isClosed?"Coming Soon":bk?"ไม่ว่าง":"";
       h+=`<div class="tl-cell"><div class="${cls}" ${oc}>${lbl}</div></div>`;
     });
     h+=`</div>`;
@@ -631,6 +637,7 @@ function parseJSON(json){
       if(!t)return'bk';const lo=t.toLowerCase();
       if(lo==='coach')return'co';if(lo==='monthly')return'mo';if(lo==='oncall')return'cr';return'bk';
     };
+    const isClosedCourt=(name)=>name&&name.includes('ยังไม่เปิดให้บริการ');
     const bkObj=json.bookings||{};
     const entries=Array.isArray(bkObj)?[[null,bkObj]]:Object.entries(bkObj);
     entries.forEach(([key,arr])=>{
@@ -643,17 +650,17 @@ function parseJSON(json){
         const hS=+b.hS,hE=+b.hE,name=b.name||b.full||"จอง",typ=typeMap(b.type);
         if(!day||!courtKey||isNaN(hS)||isNaN(hE))return;
 
-        // ── กำหนดเดือน/ปีจาก S.date (วันที่เลือก) ──
-        // S.date = "2026-06-15" → ใช้เดือน/ปีจากนี้โดยตรง
+        // ── กำหนดเดือน/ปีจาก S.date ที่เลือก (วันที่ user กด) ──
+        // S.date = "2026-06-30" → y=2026, m=5 (0-based), day=30 จาก b.date
+        // ใช้ S.date เป็น reference เดือน/ปี แต่ใช้ b.date เป็นวันที่
         let m, y;
         if(S.date){
           const dp=S.date.split('-');
-          y=+dp[0]; m=+dp[1]-1; // 0-based month
-        } else if(b.month!==undefined && b.month!==null && b.year){
-          m=+b.month; y=+b.year;
+          y=+dp[0]; m=+dp[1]-1; // เดือน/ปีจากวันที่เลือก (0-based)
         } else {
           m=refM; y=refY;
         }
+        // day มาจาก b.date ซึ่งถูกต้องอยู่แล้ว (16, 30 ฯลฯ)
 
         const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
         if(!res[ds])res[ds]={};
@@ -661,11 +668,11 @@ function parseJSON(json){
         // hStart = slot เริ่มต้น (floor), hEnd = slot สุดท้ายที่ทับ (ceil-1 ถ้า hE เป็นจำนวนเต็ม)
         const hStart = Math.floor(hS);
         const hEnd   = hE % 1 === 0 ? hE : Math.ceil(hE); // 19.5 → 20, 20.0 → 20
+        const finalType = isClosedCourt(name) ? 'closed' : typ;
         if(!res[ds][courtKey])res[ds][courtKey]=new Map();
         for(let h=hStart;h<hEnd;h++){
-          // ถ้า slot นี้มีข้อมูลอยู่แล้ว ไม่ทับ (first-come)
           if(!res[ds][courtKey].has(h))
-            res[ds][courtKey].set(h,{text:name,type:typ,partial:(hS%1!==0||hE%1!==0)});
+            res[ds][courtKey].set(h,{text:name,type:finalType,partial:(hS%1!==0||hE%1!==0)});
         }
       });
     });
