@@ -415,11 +415,11 @@ function buildStrip(){
 }
 
 function selDate(ds){
+  if(S.loading){ S.date=ds; return; } // รอ loading เสร็จก่อน
   S.date=ds;S.sel={};
   buildStrip();
   $('dlTxt').textContent=fmtThai(ds);
   updateBar();
-  // fetch ข้อมูลวันใหม่จาก Apps Script ทุกครั้งที่เปลี่ยนวัน
   fetchSheet();
   setTimeout(()=>{
     const btn=document.querySelector(".db.act");
@@ -711,7 +711,7 @@ function fetchSheet(){
     if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
     $('errTxt').textContent="หมดเวลา — กด รีเฟรช เพื่อลองใหม่";
     $('errBanner').classList.add("show");
-  },15000);
+  },25000);
 
   window[cbName]=function(data){
     clearTimeout(timeout);
