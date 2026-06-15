@@ -690,10 +690,20 @@ function parseJSON(json){
         const hStart = Math.floor(hS);
         const hEnd   = hE % 1 === 0 ? hE : Math.ceil(hE); // 19.5 → 20, 20.0 → 20
         const finalType = isClosedCourt(name) ? 'closed' : typ;
-        if(!res[ds][courtKey])res[ds][courtKey]=new Map();
-        for(let h=hStart;h<hEnd;h++){
-          if(!res[ds][courtKey].has(h))
-            res[ds][courtKey].set(h,{text:name,type:finalType,partial:(hS%1!==0||hE%1!==0)});
+        const span = +b.courtSpan || 1;
+        // mark ทุก court ที่ถูก merge ข้าม row (courtSpan > 1)
+        for(let s=0; s<span; s++){
+          const ck = s===0 ? courtKey : (() => {
+            // หา court ถัดไปใน COURTS array
+            const idx = COURTS.indexOf(courtKey);
+            return idx>=0 && COURTS[idx+s] ? COURTS[idx+s] : null;
+          })();
+          if(!ck) break;
+          if(!res[ds][ck])res[ds][ck]=new Map();
+          for(let h=hStart;h<hEnd;h++){
+            if(!res[ds][ck].has(h))
+              res[ds][ck].set(h,{text:name,type:finalType,partial:(hS%1!==0||hE%1!==0)});
+          }
         }
       });
     });
