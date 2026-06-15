@@ -680,9 +680,16 @@ function parseJSON(json){
 
         const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
         if(!res[ds])res[ds]={};
-        const hStart=Math.floor(hS),hEnd=Math.ceil(hE);
+        // ถ้า booking ครึ่งชม. (hS=17.5, hE=19.5) → mark ทุก slot ที่ทับ
+        // hStart = slot เริ่มต้น (floor), hEnd = slot สุดท้ายที่ทับ (ceil-1 ถ้า hE เป็นจำนวนเต็ม)
+        const hStart = Math.floor(hS);
+        const hEnd   = hE % 1 === 0 ? hE : Math.ceil(hE); // 19.5 → 20, 20.0 → 20
         if(!res[ds][courtKey])res[ds][courtKey]=new Map();
-        for(let h=hStart;h<hEnd;h++)res[ds][courtKey].set(h,{text:name,type:typ});
+        for(let h=hStart;h<hEnd;h++){
+          // ถ้า slot นี้มีข้อมูลอยู่แล้ว ไม่ทับ (first-come)
+          if(!res[ds][courtKey].has(h))
+            res[ds][courtKey].set(h,{text:name,type:typ,partial:(hS%1!==0||hE%1!==0)});
+        }
       });
     });
   }catch(e){console.error("parseJSON error:",e);}
