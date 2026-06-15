@@ -418,7 +418,9 @@ function selDate(ds){
   S.date=ds;S.sel={};
   buildStrip();
   $('dlTxt').textContent=fmtThai(ds);
-  renderTL();updateBar();
+  updateBar();
+  // fetch ข้อมูลวันใหม่จาก Apps Script ทุกครั้งที่เปลี่ยนวัน
+  fetchSheet();
   setTimeout(()=>{
     const btn=document.querySelector(".db.act");
     if(btn)btn.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
@@ -740,44 +742,13 @@ function fetchSheet(){
   document.body.appendChild(script);
 }
 
-// ── auto-refresh ทุก 30 วินาที — แสดง overlay บัง UI ระหว่างโหลด ──
-setInterval(()=>{
-  if(S.loading)return;
-  S.loading=true;
-  showROV(true);
-  const cbName='_cb'+Date.now();
-  const script=document.createElement('script');
-  const timeout=setTimeout(()=>{
-    delete window[cbName];script.remove();
-    S.loading=false;showROV(false);
-  },30000);
-  window[cbName]=function(data){
-    clearTimeout(timeout);delete window[cbName];script.remove();
-    S.loading=false;showROV(false);
-    try{
-      S.data=parseJSON(data);
-      recomputeGridDims();
-      buildStrip();
-      if(S.date)renderTL();
-      const now=new Date();
-      $('dlUpd').textContent=`อัพเดต ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`;
-    }catch(e){}
-  };
-  script.onerror=()=>{
-    clearTimeout(timeout);delete window[cbName];script.remove();
-    S.loading=false;showROV(false);
-  };
-  const dateQ2 = S.date ? '&date='+S.date : '';
-  script.src=CSV_URL+'?callback='+cbName+dateQ2+'&t='+Date.now();
-  document.body.appendChild(script);
-},30000);
+// ── auto-refresh ปิดแล้ว — refresh เมื่อลูกค้ากดเท่านั้น ──
 
 // ── init ──
 setInterval(tick,1000);
 tick();
 buildStrip();
-selDate(todayStr());
-fetchSheet();
+selDate(todayStr()); // selDate จะ fetchSheet อัตโนมัติ
 </script>
 </body>
 </html>
