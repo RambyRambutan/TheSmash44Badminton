@@ -477,7 +477,15 @@ function updateBar(){
   const{grand,cd}=calcAll();
   $('bbCourts').textContent=cd.map(x=>"สนาม "+x.court).join(", ");
   $('bbPrice').textContent=grand.toLocaleString()+" ฿";
-  $('bbSub').textContent=`${nSel()} ชม. · ${cd.length} สนาม`;
+  // แสดงเวลารวมทุกสนาม
+  const allSlotsSorted=[...new Set(Object.keys(S.sel).map(k=>+k.split('_')[1]))].sort((a,b)=>a-b);
+  const timeRanges=[];let ts=allSlotsSorted[0],tp=allSlotsSorted[0];
+  for(let i=1;i<allSlotsSorted.length;i++){
+    if(allSlotsSorted[i]===tp+1)tp=allSlotsSorted[i];
+    else{timeRanges.push(fmtH(ts)+'–'+fmtH(tp+1));ts=allSlotsSorted[i];tp=allSlotsSorted[i];}
+  }
+  if(allSlotsSorted.length)timeRanges.push(fmtH(ts)+'–'+fmtH(tp+1));
+  $('bbSub').textContent=`${timeRanges.join(', ')} น. · ${cd.length} สนาม`;
 }
 
 // ── timeline ──
@@ -658,17 +666,16 @@ function parseJSON(json){
         const hS=+b.hS,hE=+b.hE,name=b.name||b.full||"จอง",typ=typeMap(b.type);
         if(!day||!courtKey||isNaN(hS)||isNaN(hE))return;
 
-        // ── วิธีกำหนดเดือน/ปี ──
-        // 1. ใช้ b.month + b.year จาก Apps Script (ถูกต้องที่สุด)
-        // 2. ถ้าไม่มี: ใช้ lastUpdated เป็น reference แล้ว guess จากวันที่
+        // ── กำหนดเดือน/ปีจาก S.date (วันที่เลือก) ──
+        // S.date = "2026-06-15" → ใช้เดือน/ปีจากนี้โดยตรง
         let m, y;
-        if(b.month!==undefined && b.month!==null && b.year){
-          m=+b.month; y=+b.year; // Apps Script ส่ง month 0-based
+        if(S.date){
+          const dp=S.date.split('-');
+          y=+dp[0]; m=+dp[1]-1; // 0-based month
+        } else if(b.month!==undefined && b.month!==null && b.year){
+          m=+b.month; y=+b.year;
         } else {
-          // fallback: ถ้าวันที่ใน booking < วันปัจจุบัน-15 → น่าจะเป็นเดือนหน้า
           m=refM; y=refY;
-          if(day < lu.getDate()-15){ m++; if(m>11){m=0;y++;} }
-          else if(day > lu.getDate()+15){ m--; if(m<0){m=11;y--;} }
         }
 
         const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
