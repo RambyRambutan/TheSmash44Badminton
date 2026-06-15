@@ -309,7 +309,7 @@ const $=id=>{
 };
 
 // ── CONFIG ──
-const CSV_URL="https://script.google.com/macros/s/AKfycbw79XKQImI5zRU6HumLW59lOqlomahSCpu7usbeAydj45GVz5dP0NOk7FYF_qq5JM0v0g/exec";
+const CSV_URL="https://script.google.com/macros/s/AKfycbxotmf_cYlazF1sob0Xzj-VDMnHLwaMCTHIrQqTFPH0tVvvjNWvNu-tNfYW9f9hdkILAA/exec";
 const LINE_OA="@thesmash44";
 
 // ── DYNAMIC: คำนวณจาก live data ทุกครั้งที่โหลด ──
@@ -323,18 +323,37 @@ const EN_DOW=["SUN","MON","TUE","WED","THU","FRI","SAT"];
 
 let S={date:"",sel:{},data:null,loading:false,meta:null};
 
-// ── recomputeGridDims: ใช้ totalCourts/openHour/closeHour จาก Apps Script ──
-// S.meta = { totalCourts, openHour, closeHour } เซ็ตตอน parseJSON()
+// ── recomputeGridDims: สร้าง COURTS จาก S.data (court ที่มีข้อมูลจริง) ──
 function recomputeGridDims(){
   const openHour  = (S.meta && S.meta.openHour  != null) ? S.meta.openHour  : 8;
   const closeHour = (S.meta && S.meta.closeHour != null) ? S.meta.closeHour : 24;
 
-  // ใช้ courtList จาก Apps Script ถ้ามี มิฉะนั้น fallback ตัวเลข
-  if(S.meta && S.meta.courtList && S.meta.courtList.length > 0){
-    COURTS = S.meta.courtList; // ["A1","A2",...,"B10"]
+  // รวม court ทั้งหมดจาก S.data แล้ว sort
+  // กรองเฉพาะ format ที่ถูกต้อง: A1-A7 / B1-B10 (มีตัวอักษรนำ)
+  // ถ้ามีแต่ตัวเลขล้วน (เช่น "1","2") ให้ fallback เป็น A1-A7
+  const courtSet = new Set();
+  if(S.data){
+    Object.values(S.data).forEach(dayObj=>{
+      Object.keys(dayObj).forEach(c=>courtSet.add(c));
+    });
+  }
+  const allCourts = Array.from(courtSet);
+  // แยก: named courts (A1, B3 ฯลฯ) vs numeric ("1","2","3")
+  const namedCourts = allCourts.filter(c=>/[A-Za-z]/.test(c));
+  const numericCourts = allCourts.filter(c=>!/[A-Za-z]/.test(c));
+
+  if(namedCourts.length > 0){
+    // sort: A1,A2,...,A7,B1,...,B10
+    COURTS = namedCourts.sort((a,b)=>{
+      const la=a.match(/^([A-Za-z]+)(\d+)$/), lb=b.match(/^([A-Za-z]+)(\d+)$/);
+      if(!la||!lb) return a.localeCompare(b);
+      if(la[1]!==lb[1]) return la[1].localeCompare(lb[1]);
+      return +la[2]-+lb[2];
+    });
+  } else if(numericCourts.length > 0){
+    COURTS = numericCourts.sort((a,b)=>+a-+b);
   } else {
-    const n = (S.meta && S.meta.totalCourts > 0) ? S.meta.totalCourts : 7;
-    COURTS = Array.from({length:n}, (_,i) => i+1);
+    COURTS = ['A1','A2','A3','A4','A5','A6','A7'];
   }
 
   ALL_H = [];
@@ -478,6 +497,25 @@ function renderTL(){
     tlLoad.innerHTML="<div style='font-size:32px'>📅</div>เลือกวันที่ด้านบน";
     tlLoad.style.display="flex";tlInner.style.display="none";return;
   }
+  // คำนวณสนามที่ต้องแสดงสำหรับวันที่เลือก
+  // ใช้ COURTS ที่มีข้อมูลในวันนั้น + sort ใหม่
+  let activeCourts = COURTS;
+  if(S.data && S.data[S.date]){
+    const dayCourts = Object.keys(S.data[S.date]);
+    // รวม COURTS ทั้งหมด + dayCourts ให้ครบ แล้ว sort
+    const merged = [...new Set([...COURTS.map(String), ...dayCourts])];
+    const named = merged.filter(c=>/[A-Za-z]/.test(c));
+    if(named.length > 0){
+      activeCourts = named.sort((a,b)=>{
+        const la=a.match(/^([A-Za-z]+)(\d+)$/), lb=b.match(/^([A-Za-z]+)(\d+)$/);
+        if(!la||!lb) return a.localeCompare(b);
+        if(la[1]!==lb[1]) return la[1].localeCompare(lb[1]);
+        return +la[2]-+lb[2];
+      });
+    } else {
+      activeCourts = merged.sort((a,b)=>+a-+b);
+    }
+  }
   const hrs=getHrs();
   const CW=68,NW=68;
   const gc=`${NW}px repeat(${hrs.length},${CW}px)`;
@@ -485,7 +523,7 @@ function renderTL(){
     <div class="tl-corner">สนาม</div>`;
   hrs.forEach(hr=>{h+=`<div class="tl-hcell">${String(hr).padStart(2,'0')}.00</div>`;});
   h+=`</div>`;
-  COURTS.forEach(c=>{
+  activeCourts.forEach(c=>{
     h+=`<div class="tl-row" style="grid-template-columns:${gc}">
       <div class="tl-cname">สนาม ${c}</div>`;
     hrs.forEach(hr=>{
@@ -495,7 +533,7 @@ function renderTL(){
       if(sel)cls+="s-sel";
       else if(bk)cls+="s-"+info.type;
       else cls+="s-free";
-      const oc=!bk?`onclick="tog(${c},${hr})"` :"";
+      const oc=!bk?`onclick="tog('${c}',${hr})"` :"";
       const lbl=sel?"✓":bk?"ไม่ว่าง":"";
       h+=`<div class="tl-cell"><div class="${cls}" ${oc}>${lbl}</div></div>`;
     });
@@ -505,21 +543,8 @@ function renderTL(){
 }
 
 function tog(c,h){
+  // c = court string e.g. "A1", h = hour number
   const k=sk(c,h);
-  if(!isWknd(S.date)){
-    const dow=new Date(S.date+"T12:00:00").getDay();
-    if(dow>=1&&dow<=5&&h>=18&&h<22){
-      const blockStart=h<20?18:20;
-      const k1=sk(c,blockStart),k2=sk(c,blockStart+1);
-      const bk1=bookingInfo(c,blockStart),bk2=bookingInfo(c,blockStart+1);
-      if(!bk1&&!bk2){
-        const alreadySel=S.sel[k1]&&S.sel[k2];
-        if(alreadySel){delete S.sel[k1];delete S.sel[k2];}
-        else{S.sel[k1]=true;S.sel[k2]=true;}
-        renderTL();updateBar();return;
-      }
-    }
-  }
   S.sel[k]?delete S.sel[k]:(S.sel[k]=true);
   renderTL();updateBar();
 }
@@ -622,22 +647,28 @@ function parseJSON(json){
     const bkObj=json.bookings||{};
     const entries=Array.isArray(bkObj)?[[null,bkObj]]:Object.entries(bkObj);
     entries.forEach(([key,arr])=>{
-      let keyM=null;
-      if(key){const mk=key.split('_')[0].toUpperCase();if(EN_MON_MAP[mk]!==undefined)keyM=EN_MON_MAP[mk];}
+      // key format: "MON_30", "FRI_27" — วัน_วันที่ ไม่ใช่เดือน
+      // ดึงเดือนจาก b.month/b.year โดยตรง (Apps Script ส่งมาทุก booking)
+      // fallback: ใช้ lastUpdated month
       arr.forEach(b=>{
         const day=+b.date;
-        const courtKey=String(b.court||'').trim(); // "A1","B3" etc. — ไม่แปลงเป็นตัวเลข
+        const courtKey=String(b.court||'').trim(); // "A1","B3" ฯลฯ
         const hS=+b.hS,hE=+b.hE,name=b.name||b.full||"จอง",typ=typeMap(b.type);
         if(!day||!courtKey||isNaN(hS)||isNaN(hE))return;
-        let m,y;
-        if(b.month!==undefined&&b.year){m=+b.month;y=+b.year;}
-        else if(keyM!==null){
-          m=keyM;y=refY;
-          if(keyM<refM-6)y=refY+1;else if(keyM>refM+6)y=refY-1;
-        }else{
-          m=refM;y=refY;
-          if(day>lu.getDate()+15){m--;if(m<0){m=11;y--;}}
+
+        // ── วิธีกำหนดเดือน/ปี ──
+        // 1. ใช้ b.month + b.year จาก Apps Script (ถูกต้องที่สุด)
+        // 2. ถ้าไม่มี: ใช้ lastUpdated เป็น reference แล้ว guess จากวันที่
+        let m, y;
+        if(b.month!==undefined && b.month!==null && b.year){
+          m=+b.month; y=+b.year; // Apps Script ส่ง month 0-based
+        } else {
+          // fallback: ถ้าวันที่ใน booking < วันปัจจุบัน-15 → น่าจะเป็นเดือนหน้า
+          m=refM; y=refY;
+          if(day < lu.getDate()-15){ m++; if(m>11){m=0;y++;} }
+          else if(day > lu.getDate()+15){ m--; if(m<0){m=11;y--;} }
         }
+
         const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
         if(!res[ds])res[ds]={};
         const hStart=Math.floor(hS),hEnd=Math.ceil(hE);
