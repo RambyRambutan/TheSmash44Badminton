@@ -323,37 +323,30 @@ const EN_DOW=["SUN","MON","TUE","WED","THU","FRI","SAT"];
 
 let S={date:"",sel:{},data:null,loading:false,meta:null};
 
-// ── recomputeGridDims: สร้าง COURTS จาก S.data (court ที่มีข้อมูลจริง) ──
+// ── recomputeGridDims: ใช้ courtList จาก Apps Script เป็นหลัก ──
+function sortCourts(arr){
+  return arr.slice().sort((a,b)=>{
+    const la=a.match(/^([A-Za-z]+)(\d+)$/), lb=b.match(/^([A-Za-z]+)(\d+)$/);
+    if(!la||!lb) return a.localeCompare(b);
+    if(la[1]!==lb[1]) return la[1].localeCompare(lb[1]);
+    return +la[2]-+lb[2];
+  });
+}
 function recomputeGridDims(){
   const openHour  = (S.meta && S.meta.openHour  != null) ? S.meta.openHour  : 8;
   const closeHour = (S.meta && S.meta.closeHour != null) ? S.meta.closeHour : 24;
 
-  // รวม court ทั้งหมดจาก S.data แล้ว sort
-  // กรองเฉพาะ format ที่ถูกต้อง: A1-A7 / B1-B10 (มีตัวอักษรนำ)
-  // ถ้ามีแต่ตัวเลขล้วน (เช่น "1","2") ให้ fallback เป็น A1-A7
-  const courtSet = new Set();
-  if(S.data){
-    Object.values(S.data).forEach(dayObj=>{
-      Object.keys(dayObj).forEach(c=>courtSet.add(c));
-    });
-  }
-  const allCourts = Array.from(courtSet);
-  // แยก: named courts (A1, B3 ฯลฯ) vs numeric ("1","2","3")
-  const namedCourts = allCourts.filter(c=>/[A-Za-z]/.test(c));
-  const numericCourts = allCourts.filter(c=>!/[A-Za-z]/.test(c));
-
-  if(namedCourts.length > 0){
-    // sort: A1,A2,...,A7,B1,...,B10
-    COURTS = namedCourts.sort((a,b)=>{
-      const la=a.match(/^([A-Za-z]+)(\d+)$/), lb=b.match(/^([A-Za-z]+)(\d+)$/);
-      if(!la||!lb) return a.localeCompare(b);
-      if(la[1]!==lb[1]) return la[1].localeCompare(lb[1]);
-      return +la[2]-+lb[2];
-    });
-  } else if(numericCourts.length > 0){
-    COURTS = numericCourts.sort((a,b)=>+a-+b);
+  // ✅ ใช้ courtList จาก Apps Script ก่อน (ครบทุกสนามแม้ว่างทั้งวัน)
+  if(S.meta && S.meta.courtList && S.meta.courtList.length > 0){
+    const named = S.meta.courtList.filter(c=>/[A-Za-z]/.test(c));
+    COURTS = named.length > 0 ? sortCourts(named) : sortCourts(S.meta.courtList);
   } else {
-    COURTS = ['A1','A2','A3','A4','A5','A6','A7'];
+    // fallback: scan S.data
+    const courtSet = new Set();
+    if(S.data) Object.values(S.data).forEach(d=>Object.keys(d).forEach(c=>courtSet.add(c)));
+    const all = Array.from(courtSet);
+    const named = all.filter(c=>/[A-Za-z]/.test(c));
+    COURTS = named.length > 0 ? sortCourts(named) : all.length > 0 ? all.sort((a,b)=>+a-+b) : ['A1','A2','A3','A4','A5','A6','A7'];
   }
 
   ALL_H = [];
@@ -365,6 +358,7 @@ function recomputeGridDims(){
   const endStr   = String(endH).padStart(2,'0')+'.00';
   const now = new Date();
   $('subInfo').textContent = `${TH_MON[now.getMonth()]} ${now.getFullYear()+543} · ${COURTS.length} สนาม · ${startStr}–${endStr}`;
+  console.log('COURTS:', COURTS);
 }
 
 // ── helpers ──
@@ -507,25 +501,8 @@ function renderTL(){
     tlLoad.innerHTML="<div style='font-size:32px'>📅</div>เลือกวันที่ด้านบน";
     tlLoad.style.display="flex";tlInner.style.display="none";return;
   }
-  // คำนวณสนามที่ต้องแสดงสำหรับวันที่เลือก
-  // ใช้ COURTS ที่มีข้อมูลในวันนั้น + sort ใหม่
-  let activeCourts = COURTS;
-  if(S.data && S.data[S.date]){
-    const dayCourts = Object.keys(S.data[S.date]);
-    // รวม COURTS ทั้งหมด + dayCourts ให้ครบ แล้ว sort
-    const merged = [...new Set([...COURTS.map(String), ...dayCourts])];
-    const named = merged.filter(c=>/[A-Za-z]/.test(c));
-    if(named.length > 0){
-      activeCourts = named.sort((a,b)=>{
-        const la=a.match(/^([A-Za-z]+)(\d+)$/), lb=b.match(/^([A-Za-z]+)(\d+)$/);
-        if(!la||!lb) return a.localeCompare(b);
-        if(la[1]!==lb[1]) return la[1].localeCompare(lb[1]);
-        return +la[2]-+lb[2];
-      });
-    } else {
-      activeCourts = merged.sort((a,b)=>+a-+b);
-    }
-  }
+  // แสดงทุกสนามจาก COURTS (มาจาก courtList ของ Apps Script)
+  const activeCourts = COURTS;
   const hrs=getHrs();
   const CW=68,NW=68;
   const gc=`${NW}px repeat(${hrs.length},${CW}px)`;
