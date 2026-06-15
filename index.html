@@ -536,8 +536,29 @@ function renderTL(){
 }
 
 function tog(c,h){
-  // c = court string e.g. "A1", h = hour number
   const k=sk(c,h);
+  const wknd=isWknd(S.date);
+  const dow=new Date(S.date+"T12:00:00").getDay();
+  const isWeekday=!wknd&&dow>=1&&dow<=5;
+
+  // ── เงื่อนไข 18-22 วันธรรมดา ──
+  // บังคับ 2 ชม. ถ้าทั้ง block ว่างครบ 2 ชม.
+  if(isWeekday && h>=18 && h<22){
+    const blockStart = h<20 ? 18 : 20; // block 18-20 หรือ 20-22
+    const k1=sk(c,blockStart), k2=sk(c,blockStart+1);
+    const bk1=bookingInfo(c,blockStart), bk2=bookingInfo(c,blockStart+1);
+    const free1=!bk1, free2=!bk2;
+
+    if(free1 && free2){
+      // ทั้ง block ว่าง → toggle ทั้ง 2 ชม.
+      const bothSel=S.sel[k1]&&S.sel[k2];
+      if(bothSel){delete S.sel[k1];delete S.sel[k2];}
+      else{S.sel[k1]=true;S.sel[k2]=true;}
+      renderTL();updateBar();return;
+    }
+    // ถ้าว่างแค่ 1 ชม. → จองชม.เดียวได้ปกติ
+  }
+
   S.sel[k]?delete S.sel[k]:(S.sel[k]=true);
   renderTL();updateBar();
 }
