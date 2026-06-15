@@ -696,7 +696,9 @@ function showROV(show){
 
 // ── fetchSheet via JSONP ──
 function fetchSheet(){
-  if(S.loading)return;
+  // force reset loading state เพื่อป้องกันค้าง
+  S.loading=false;
+  showROV(false);
   S.loading=true;
   showROV(true);
   $('errBanner').classList.remove("show");
@@ -716,6 +718,7 @@ function fetchSheet(){
   window[cbName]=function(data){
     clearTimeout(timeout);
     delete window[cbName];script.remove();S.loading=false;showROV(false);
+    console.log('JSONP received, keys:', Object.keys(data));
     try{
       S.data=parseJSON(data);
       recomputeGridDims(); // ← อัปเดต COURTS และ ALL_H จาก live data
@@ -735,17 +738,18 @@ function fetchSheet(){
     }
   };
 
-  script.onerror=()=>{
+  script.onerror=(e)=>{
     clearTimeout(timeout);
     delete window[cbName];script.remove();S.loading=false;showROV(false);
+    console.error('JSONP script error:', e, 'URL:', script.src);
     if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
     $('errTxt').textContent="เชื่อมต่อไม่ได้ — กด รีเฟรช เพื่อลองใหม่";
     $('errBanner').classList.add("show");
   };
 
-  // ส่งเฉพาะวันที่เลือก → response เล็กลง 30x
   const dateQ = S.date ? '&date='+S.date : '';
   script.src=CSV_URL+'?callback='+cbName+dateQ+'&t='+Date.now();
+  console.log('JSONP requesting:', script.src);
   document.body.appendChild(script);
 }
 
