@@ -309,7 +309,7 @@ const $=id=>{
 };
 
 // ── CONFIG ──
-const CSV_URL="https://script.google.com/macros/s/AKfycbxotmf_cYlazF1sob0Xzj-VDMnHLwaMCTHIrQqTFPH0tVvvjNWvNu-tNfYW9f9hdkILAA/exec";
+const CSV_URL="https://script.google.com/macros/s/AKfycbx6jCbHJOUFwZZRxuQaodcWV1tQ2wV55SpQDu1-oWKZVNRoi1L4CqZoaYdnXqDPe6XBSQ/exec";
 const LINE_OA="@thesmash44";
 
 // ── DYNAMIC: คำนวณจาก live data ทุกครั้งที่โหลด ──
@@ -702,7 +702,7 @@ function fetchSheet(){
     if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
     $('errTxt').textContent="หมดเวลา — กด รีเฟรช เพื่อลองใหม่";
     $('errBanner').classList.add("show");
-  },30000);
+  },15000);
 
   window[cbName]=function(data){
     clearTimeout(timeout);
@@ -734,7 +734,9 @@ function fetchSheet(){
     $('errBanner').classList.add("show");
   };
 
-  script.src=CSV_URL+'?callback='+cbName+'&t='+Date.now();
+  // ส่งเฉพาะวันที่เลือก → response เล็กลง 30x
+  const dateQ = S.date ? '&date='+S.date : '';
+  script.src=CSV_URL+'?callback='+cbName+dateQ+'&t='+Date.now();
   document.body.appendChild(script);
 }
 
@@ -765,7 +767,8 @@ setInterval(()=>{
     clearTimeout(timeout);delete window[cbName];script.remove();
     S.loading=false;showROV(false);
   };
-  script.src=CSV_URL+'?callback='+cbName+'&t='+Date.now();
+  const dateQ2 = S.date ? '&date='+S.date : '';
+  script.src=CSV_URL+'?callback='+cbName+dateQ2+'&t='+Date.now();
   document.body.appendChild(script);
 },30000);
 
