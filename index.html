@@ -586,8 +586,8 @@ function closeModal(){ document.getElementById('modalOv').classList.remove('open
 // ── GOOGLE SHEETS MANUAL REFRESH ──
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
-function showRefreshOverlay(){ const o=document.getElementById('refreshOv'); if(o){o.style.display='flex';} }
-function hideRefreshOverlay(){ const o=document.getElementById('refreshOv'); if(o){o.style.display='none';} }
+function showRefreshOverlay(){ const o=document.getElementById('refreshOv'); if(o){o.classList.add('show'); o.style.display='flex';} }
+function hideRefreshOverlay(){ const o=document.getElementById('refreshOv'); if(o){o.classList.remove('show'); o.style.display='none';} }
 
 function manualRefresh(){
   if(!SHEETS_URL){ toast('⚠️ ยังไม่ได้ตั้งค่า SHEETS_URL'); return; }
@@ -647,20 +647,22 @@ init();
 </script>
 
 <!-- ── REFRESH OVERLAY ── -->
-<div id="refreshOv" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(10,5,25,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;flex-direction:column;gap:16px;">
-  <div style="background:#1a1030;border:2px solid #7B2FBE;border-radius:16px;padding:36px 48px;text-align:center;box-shadow:0 0 60px rgba(123,47,190,.5);">
+<style>
+@keyframes dot-pulse{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+#refreshOv{display:none;position:fixed;inset:0;z-index:99999;background:rgba(10,5,25,.88);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);align-items:center;justify-content:center;}
+#refreshOv.show{display:flex!important;}
+</style>
+<div id="refreshOv">
+  <div style="background:#1a1030;border:2px solid #7B2FBE;border-radius:16px;padding:36px 48px;text-align:center;box-shadow:0 0 60px rgba(123,47,190,.5);pointer-events:none;">
     <div style="font-size:2.4rem;margin-bottom:8px;">🏸</div>
-    <div style="font-family:'Kanit',sans-serif;font-size:1.3rem;font-weight:700;color:#C8F400;letter-spacing:.05em;margin-bottom:6px;">กำลังอัปเดตข้อมูล</div>
+    <div style="font-size:1.3rem;font-weight:700;color:#C8F400;letter-spacing:.05em;margin-bottom:6px;">กำลังอัปเดตข้อมูล</div>
     <div style="font-size:.85rem;color:#a89fd0;margin-bottom:20px;">กรุณารอสักครู่...</div>
     <div style="display:flex;justify-content:center;gap:8px;">
-      <span style="width:10px;height:10px;border-radius:50%;background:#7B2FBE;animation:dot-pulse 1.2s .0s infinite;"></span>
-      <span style="width:10px;height:10px;border-radius:50%;background:#7B2FBE;animation:dot-pulse 1.2s .4s infinite;"></span>
-      <span style="width:10px;height:10px;border-radius:50%;background:#7B2FBE;animation:dot-pulse 1.2s .8s infinite;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;background:#7B2FBE;animation:dot-pulse 1.2s 0s infinite;display:inline-block;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;background:#7B2FBE;animation:dot-pulse 1.2s .4s infinite;display:inline-block;"></span>
+      <span style="width:10px;height:10px;border-radius:50%;background:#7B2FBE;animation:dot-pulse 1.2s .8s infinite;display:inline-block;"></span>
     </div>
   </div>
 </div>
-<style>
-@keyframes dot-pulse{0%,80%,100%{transform:scale(.6);opacity:.4}40%{transform:scale(1);opacity:1}}
-</style>
 </body>
 </html>
