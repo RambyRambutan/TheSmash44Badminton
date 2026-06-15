@@ -309,7 +309,7 @@ const $=id=>{
 };
 
 // ── CONFIG ──
-const CSV_URL="https://script.google.com/macros/s/AKfycbx6jCbHJOUFwZZRxuQaodcWV1tQ2wV55SpQDu1-oWKZVNRoi1L4CqZoaYdnXqDPe6XBSQ/exec";
+const CSV_URL="https://script.google.com/macros/s/AKfycbwm0WZQJNLJIkdHlQYLNlbJcmVF6yT0Iy313CllAiaTTgmwJ4eNiCozmZehGvubtiodPA/exec";
 const LINE_OA="@thesmash44";
 
 // ── DYNAMIC: คำนวณจาก live data ทุกครั้งที่โหลด ──
@@ -694,63 +694,53 @@ function showROV(show){
   $('rov').classList[show?'add':'remove']('show');
 }
 
-// ── fetchSheet via JSONP ──
-function fetchSheet(){
-  // force reset loading state เพื่อป้องกันค้าง
-  S.loading=false;
-  showROV(false);
-  S.loading=true;
-  showROV(true);
+// ── fetchSheet via fetch() API — ไม่ใช้ JSONP เพื่อหลีกเลี่ยง redirect block ──
+async function fetchSheet(){
+  S.loading=false; showROV(false); // reset ก่อน
+  S.loading=true;  showROV(true);
   $('errBanner').classList.remove("show");
   const btn=$('btnRefresh');
   if(btn.classList){btn.innerHTML="⏳ Refreshing...";btn.classList.remove("updated");btn.classList.add("refreshing");}
 
-  const cbName='_cb'+Date.now();
-  const script=document.createElement('script');
-
-  const timeout=setTimeout(()=>{
-    delete window[cbName];script.remove();S.loading=false;showROV(false);
-    if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
-    $('errTxt').textContent="หมดเวลา — กด รีเฟรช เพื่อลองใหม่";
-    $('errBanner').classList.add("show");
-  },25000);
-
-  window[cbName]=function(data){
-    clearTimeout(timeout);
-    delete window[cbName];script.remove();S.loading=false;showROV(false);
-    console.log('JSONP received, keys:', Object.keys(data));
-    try{
-      S.data=parseJSON(data);
-      recomputeGridDims(); // ← อัปเดต COURTS และ ALL_H จาก live data
-      const t=new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
-      $('updTime').textContent="อัพเดต "+t+" น.";
-      $('dlUpd').textContent="อัพเดต "+t+" น.";
-      if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="✓ Updated";btn.classList.add("updated");}
-      setTimeout(()=>{if(btn.classList){btn.innerHTML="🔄 รีเฟรช";btn.classList.remove("updated");}},3000);
-      buildStrip();
-      if(S.date)renderTL();
-      else selDate(todayStr());
-    }catch(e){
-      console.error("parse error:",e);
-      $('errTxt').textContent="พาร์สข้อมูลไม่สำเร็จ: "+e.message;
-      $('errBanner').classList.add("show");
-      if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
-    }
-  };
-
-  script.onerror=(e)=>{
-    clearTimeout(timeout);
-    delete window[cbName];script.remove();S.loading=false;showROV(false);
-    console.error('JSONP script error:', e, 'URL:', script.src);
-    if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
-    $('errTxt').textContent="เชื่อมต่อไม่ได้ — กด รีเฟรช เพื่อลองใหม่";
-    $('errBanner').classList.add("show");
-  };
-
   const dateQ = S.date ? '&date='+S.date : '';
-  script.src=CSV_URL+'?callback='+cbName+dateQ+'&t='+Date.now();
-  console.log('JSONP requesting:', script.src);
-  document.body.appendChild(script);
+  const url = CSV_URL+'?'+dateQ+'&t='+Date.now();
+
+  try{
+    const res = await fetch(url, {redirect:'follow'});
+    const text = await res.text();
+
+    // HtmlService returns HTML wrapping JSON — extract JSON from it
+    let data;
+    // ลอง parse เป็น JSON โดยตรงก่อน
+    const trimmed = text.trim();
+    if(trimmed.startsWith('{')){
+      data = JSON.parse(trimmed);
+    } else {
+      // HtmlService wraps: extract JSON object from HTML body
+      const match = trimmed.match(/\{[\s\S]*\}/);
+      if(!match) throw new Error('ไม่พบ JSON ใน response');
+      data = JSON.parse(match[0]);
+    }
+
+    S.data = parseJSON(data);
+    recomputeGridDims();
+    const t=new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
+    $('updTime').textContent="อัพเดต "+t+" น.";
+    $('dlUpd').textContent="อัพเดต "+t+" น.";
+    if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="✓ Updated";btn.classList.add("updated");}
+    setTimeout(()=>{if(btn.classList){btn.innerHTML="🔄 รีเฟรช";btn.classList.remove("updated");}},3000);
+    buildStrip();
+    if(S.date) renderTL();
+    else selDate(todayStr());
+  }catch(err){
+    console.error("fetchSheet error:",err);
+    S.loading=false; showROV(false);
+    if(btn.classList){btn.classList.remove("refreshing");btn.innerHTML="🔄 รีเฟรช";}
+    $('errTxt').textContent="โหลดไม่ได้: "+err.message;
+    $('errBanner').classList.add("show");
+    return;
+  }
+  S.loading=false; showROV(false);
 }
 
 // ── auto-refresh ปิดแล้ว — refresh เมื่อลูกค้ากดเท่านั้น ──
