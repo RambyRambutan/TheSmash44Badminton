@@ -269,7 +269,7 @@ button,input{font-family:'Sarabun',sans-serif;cursor:pointer;outline:none;border
         <span class="s-total-val" id="mTotal"></span>
       </div>
       <div class="fg">
-        <label class="fl">👤 ชื่อผู้จอง</label>
+        <label class="fl">👤 ชื่อ-นามสกุล</label>
         <input type="text" class="fi" id="inpName" placeholder="สมชาย ใจดี">
         <div class="ferr" id="errName">⚠ กรุณากรอกชื่อ</div>
       </div>
@@ -383,12 +383,28 @@ function buildStrip(){
   const today=todayStr();
   const now=new Date();
   const y=now.getFullYear(),m=now.getMonth();
-  const days=new Date(y,m+1,0).getDate();
-  const fallbackDates=[];
-  for(let d=1;d<=days;d++)
-    fallbackDates.push(`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
-  const dataSorted=S.data?Object.keys(S.data).sort():[...fallbackDates];
-  const allDates=[...new Set([...fallbackDates,...dataSorted])].sort();
+
+  // สร้าง date list จาก S.data จริง (ทุกวันที่มีข้อมูลใน Sheet)
+  // บวกกับวันในเดือนปัจจุบันที่ยังไม่ผ่านไป (สำหรับวันว่าง)
+  const dateSet=new Set();
+
+  // เพิ่มทุกวันในเดือนปัจจุบัน
+  const daysThisMonth=new Date(y,m+1,0).getDate();
+  for(let d=1;d<=daysThisMonth;d++)
+    dateSet.add(`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+
+  // ถ้าวันที่ 26+ ให้แสดงเดือนหน้าด้วย
+  if(now.getDate()>=26){
+    const nm=m+1>11?0:m+1, ny=m+1>11?y+1:y;
+    const daysNextMonth=new Date(ny,nm+1,0).getDate();
+    for(let d=1;d<=daysNextMonth;d++)
+      dateSet.add(`${ny}-${String(nm+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+  }
+
+  // เพิ่มวันจาก S.data (รวมเดือนอื่นๆ ที่มีข้อมูล)
+  if(S.data) Object.keys(S.data).forEach(ds=>dateSet.add(ds));
+
+  const allDates=[...dateSet].sort();
 
   let h="",prevM=-1;
   allDates.forEach(ds=>{
@@ -410,12 +426,11 @@ function buildStrip(){
 }
 
 function selDate(ds){
-  if(S.loading){ S.date=ds; return; } // รอ loading เสร็จก่อน
   S.date=ds;S.sel={};
   buildStrip();
   $('dlTxt').textContent=fmtThai(ds);
+  renderTL();
   updateBar();
-  fetchSheet();
   setTimeout(()=>{
     const btn=document.querySelector(".db.act");
     if(btn)btn.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
@@ -724,8 +739,8 @@ async function fetchSheet(){
   const btn=$('btnRefresh');
   if(btn.classList){btn.innerHTML="⏳ Refreshing...";btn.classList.remove("updated");btn.classList.add("refreshing");}
 
-  const dateQ = S.date ? '&date='+S.date : '';
-  const url = CSV_URL+'?'+dateQ+'&t='+Date.now();
+  // โหลดข้อมูลทั้งหมดครั้งเดียว — ไม่ filter ตามวัน
+  const url = CSV_URL+'?t='+Date.now();
 
   try{
     const res = await fetch(url, {redirect:'follow'});
