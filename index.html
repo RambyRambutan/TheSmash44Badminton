@@ -333,16 +333,26 @@ function sortCourts(arr){
     return +la[2]-+lb[2];
   });
 }
-function recomputeGridDims(){
-  const openHour  = (S.meta && S.meta.openHour  != null) ? S.meta.openHour  : 8;
-  const closeHour = (S.meta && S.meta.closeHour != null) ? S.meta.closeHour : 24;
+function recomputeGridDims(rawData){
+  // รับ raw JSON จาก Apps Script โดยตรง (ก่อน parseJSON)
+  // หรือถ้าไม่ส่งมา ใช้ S.meta เดิม
+  const src = rawData || {};
+  const openHour  = src.openHour  != null ? src.openHour  : (S.meta ? S.meta.openHour  : 8);
+  const closeHour = src.closeHour != null ? src.closeHour : (S.meta ? S.meta.closeHour : 24);
+  const courtList = (src.courtList && src.courtList.length) ? src.courtList
+                  : (S.meta && S.meta.courtList && S.meta.courtList.length) ? S.meta.courtList : [];
 
-  // ✅ ใช้ courtList จาก Apps Script ก่อน (ครบทุกสนามแม้ว่างทั้งวัน)
-  if(S.meta && S.meta.courtList && S.meta.courtList.length > 0){
-    const named = S.meta.courtList.filter(c=>/[A-Za-z]/.test(c));
-    COURTS = named.length > 0 ? sortCourts(named) : sortCourts(S.meta.courtList);
+  // update S.meta ทันที
+  if(src.courtList) S.meta = {
+    totalCourts: src.totalCourts || 0,
+    courtList:   src.courtList || [],
+    openHour, closeHour
+  };
+
+  if(courtList.length > 0){
+    const named = courtList.filter(c=>/[A-Za-z]/.test(c));
+    COURTS = named.length > 0 ? sortCourts(named) : sortCourts(courtList);
   } else {
-    // fallback: scan S.data
     const courtSet = new Set();
     if(S.data) Object.values(S.data).forEach(d=>Object.keys(d).forEach(c=>courtSet.add(c)));
     const all = Array.from(courtSet);
@@ -648,12 +658,7 @@ async function sendLine(){
 // ── parseJSON: รองรับ Apps Script JSONP format ──
 function parseJSON(json){
   // เก็บ meta จาก Apps Script (totalCourts, openHour, closeHour)
-  S.meta = {
-    totalCourts: json.totalCourts || 0,
-    courtList:   json.courtList   || [],
-    openHour:    json.openHour    != null ? json.openHour    : 8,
-    closeHour:   json.closeHour   != null ? json.closeHour   : 24,
-  };
+  // S.meta ถูก set ใน recomputeGridDims แล้ว — ไม่ต้อง set ซ้ำ
   const res={};
   try{
     const lu=json.lastUpdated?new Date(json.lastUpdated):new Date();
@@ -750,8 +755,8 @@ async function fetchSheet(){
       data = JSON.parse(match[0]);
     }
 
+    recomputeGridDims(data); // ต้อง recompute ก่อน parseJSON เพื่อให้ COURTS พร้อม
     S.data = parseJSON(data);
-    recomputeGridDims();
     const t=new Date().toLocaleTimeString("th-TH",{hour:"2-digit",minute:"2-digit"});
     $('updTime').textContent="อัพเดต "+t+" น.";
     $('dlUpd').textContent="อัพเดต "+t+" น.";
