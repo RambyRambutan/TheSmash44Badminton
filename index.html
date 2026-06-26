@@ -385,30 +385,15 @@ function buildStrip(){
   const y=now.getFullYear(),m=now.getMonth();
 
   const dateSet=new Set();
-
-  // เดือนปัจจุบันเสมอ
+  // เดือนปัจจุบัน
   const days=new Date(y,m+1,0).getDate();
   for(let d=1;d<=days;d++)
     dateSet.add(`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
-
   // เดือนหน้าเสมอ
   const nm=m+1>11?0:m+1, ny=m+1>11?y+1:y;
   const daysNext=new Date(ny,nm+1,0).getDate();
   for(let d=1;d<=daysNext;d++)
     dateSet.add(`${ny}-${String(nm+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
-
-  // เดือนอื่นๆ ที่มีข้อมูลใน Sheet — เพิ่มเองอัตโนมัติ
-  if(S.data){
-    Object.keys(S.data).forEach(ds=>{
-      // ds = "2026-08-01" → เพิ่มทุกวันของเดือนนั้น
-      const dp=ds.split('-');
-      const ey=+dp[0],em=+dp[1]-1;
-      const daysInMonth=new Date(ey,em+1,0).getDate();
-      for(let d=1;d<=daysInMonth;d++)
-        dateSet.add(`${ey}-${String(em+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
-    });
-  }
-
   const allDates=[...dateSet].sort();
 
   let h="",prevM=-1;
